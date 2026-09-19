@@ -1,5 +1,5 @@
 {
-  "base": "http://localhost:5173",
+  "base": "http://localhost:8080",
   "pass": 23,
   "fail": 0,
   "results": [
@@ -26,7 +26,7 @@
     {
       "name": "05 未登录点击立即购买跳转登录页",
       "ok": true,
-      "detail": "http://localhost:5173/login?redirect=/products/1"
+      "detail": "http://localhost:8080/login?redirect=/products/1"
     },
     {
       "name": "06 登录 buyer01",
@@ -41,7 +41,7 @@
     {
       "name": "08 下单-立即购买并填写留言",
       "ok": true,
-      "detail": "http://localhost:5173/orders?orderId=3"
+      "detail": "http://localhost:8080/orders?orderId=3"
     },
     {
       "name": "10 我的收藏列表",
@@ -56,17 +56,17 @@
     {
       "name": "12 发布闲置-填写表单并上传图片",
       "ok": true,
-      "detail": "前端联调测试商品-035629"
+      "detail": "前端联调测试商品-139105"
     },
     {
       "name": "13 发布闲置-提交并跳转详情",
       "ok": true,
-      "detail": "http://localhost:5173/products/21"
+      "detail": "http://localhost:8080/products/21"
     },
     {
       "name": "14 我发布的商品列表",
       "ok": true,
-      "detail": "前端联调测试商品-035629"
+      "detail": "前端联调测试商品-139105"
     },
     {
       "name": "15 商品下架与重新上架",
@@ -76,7 +76,7 @@
     {
       "name": "16 消息中心-未读与标记已读",
       "ok": true,
-      "detail": "未读消息 1 条"
+      "detail": "未读消息 2 条"
     },
     {
       "name": "17 个人中心-资料与改密码表单",

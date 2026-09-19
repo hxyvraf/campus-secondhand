@@ -9,7 +9,8 @@ import fs from 'node:fs'
 const require = createRequire('file:///C:/Users/hxyvraf/Desktop/campus-secondhand/')
 const { chromium } = require('C:/Users/hxyvraf/AppData/Roaming/npm/node_modules/playwright')
 
-const BASE = 'http://localhost:5173'
+// 默认跑前端开发服务器（5173）；设置 UI_BASE_URL 可改为跑后端单端口模式（8080）
+const BASE = process.env.UI_BASE_URL || 'http://localhost:5173'
 const OUT = 'C:/Users/hxyvraf/Desktop/campus-secondhand/docs/测试执行证据/截图'
 const UPLOAD = 'C:/Users/hxyvraf/Desktop/campus-secondhand/docs/postman/testdata/test-upload.png'
 fs.mkdirSync(OUT, { recursive: true })

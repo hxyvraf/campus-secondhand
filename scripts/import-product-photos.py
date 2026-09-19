@@ -16,6 +16,7 @@
 
 import argparse
 import csv
+import difflib
 import json
 import os
 import re
@@ -278,6 +279,82 @@ def resolve_photo(photo_dir, raw_name):
     return None, "照片文件不存在"
 
 
+def normalize_text(value):
+    """归一化：去掉书名号/括号/空格/常见标点并转小写，便于按文件名匹配商品标题。"""
+    text = str(value or "")
+    for ch in "《》〈〉（）()【】[]{}":
+        text = text.replace(ch, "")
+    text = re.sub(r"[\s\-_、,，.。:：;；!！?？/\\|]+", "", text)
+    return text.lower()
+
+
+def auto_match_photos(products, photo_dir):
+    """按文件名与商品标题的相似度做一对一匹配，返回 (映射, 未匹配照片, 未匹配商品)。"""
+    photos = [name for name in sorted(os.listdir(photo_dir))
+              if os.path.isfile(os.path.join(photo_dir, name))
+              and os.path.splitext(name)[1].lower() in IMAGE_EXTENSIONS]
+    scored = []
+    for photo in photos:
+        photo_key = normalize_text(os.path.splitext(photo)[0])
+        if not photo_key:
+            continue
+        for product in products:
+            title_key = normalize_text(product["title"])
+            score = difflib.SequenceMatcher(None, photo_key, title_key).ratio()
+            if photo_key in title_key:
+                score += 0.5
+            if title_key in photo_key:
+                score += 0.5
+            scored.append((score, photo, product["id"]))
+    scored.sort(key=lambda item: (-item[0], item[2]))
+
+    used_photos, used_products = set(), set()
+    mapping = {}
+    for score, photo, product_id in scored:
+        if photo in used_photos or product_id in used_products:
+            continue
+        if score < 0.34:
+            continue
+        used_photos.add(photo)
+        used_products.add(product_id)
+        mapping[product_id] = (photo, score)
+    unused_photos = [name for name in photos if name not in used_photos]
+    unmatched_products = [product for product in products if product["id"] not in used_products]
+    return mapping, unused_photos, unmatched_products
+
+
+def write_filled_mapping(photo_dir, products, mapping):
+    """把自动匹配结果写进「对照表.xlsx」，方便查看与下次复跑。"""
+    path = os.path.join(photo_dir, "对照表.xlsx")
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "对照表"
+    headers = ["商品ID", "商品标题", "分类", "当前图片", "照片文件名（填这里）", "备注"]
+    sheet.append(headers)
+    for cell in sheet[1]:
+        cell.fill = HEADER_FILL
+        cell.font = HEADER_FONT
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    for product in products:
+        matched = mapping.get(product["id"])
+        sheet.append([
+            product["id"],
+            product["title"],
+            product["category"],
+            product["image"],
+            matched[0] if matched else "",
+            f"按文件名自动匹配，相似度 {matched[1]:.2f}" if matched else "未匹配到照片",
+        ])
+    for index, width in enumerate([10, 40, 14, 22, 30, 26], start=1):
+        sheet.column_dimensions[get_column_letter(index)].width = width
+    for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, max_col=len(headers)):
+        for cell in row:
+            cell.alignment = WRAP
+    sheet.freeze_panes = "A2"
+    workbook.save(path)
+    return path
+
+
 def update_data_sql(url_by_product):
     with open(DATA_SQL, "r", encoding="utf-8") as fh:
         lines = fh.readlines()
@@ -381,6 +458,8 @@ def main():
     parser.add_argument("--init", action="store_true", help="创建照片目录并生成对照表模板.xlsx")
     parser.add_argument("--force", action="store_true", help="生成模板时覆盖已存在的文件")
     parser.add_argument("--apply", action="store_true", help="正式替换：写图片、改 data.sql、更新数据库")
+    parser.add_argument("--auto-match", action="store_true",
+                        help="对照表没填时，按照片文件名与商品标题的相似度自动匹配（会写出对照表.xlsx）")
     args = parser.parse_args()
 
     products = load_products()
@@ -402,31 +481,54 @@ def main():
     if not os.path.isdir(photo_dir):
         raise SystemExit(f"照片目录不存在：{photo_dir}\n请先执行：python scripts/import-product-photos.py --init")
 
-    mapping_path = find_mapping_file(photo_dir, args.map)
-    if not mapping_path:
-        raise SystemExit(f"在 {photo_dir} 里没有找到对照表（文件名需包含「对照表」，支持 xlsx/csv/txt）")
-    log(f"使用对照表：{mapping_path}")
-
-    rows = parse_mapping(mapping_path)
     by_id = {product["id"]: product for product in products}
     items, skipped, filled = [], [], 0
-    for product_id, raw_name in rows:
-        if product_id is None:
-            skipped.append((None, "商品ID 无法识别（必须是数字）"))
-            continue
-        if product_id not in by_id:
-            skipped.append((product_id, "商品 ID 不在 1-20 范围内"))
-            continue
-        if not raw_name:
-            continue
-        filled += 1
-        photo, error = resolve_photo(photo_dir, raw_name)
-        if not photo:
-            skipped.append((product_id, f"「{raw_name}」{error}"))
-            continue
-        items.append({"productId": product_id, "source": photo, "output": f"product-{product_id:02d}.jpg"})
 
-    log(f"对照表共 {len(rows)} 行，填写了照片 {filled} 行，可处理 {len(items)} 张")
+    if args.auto_match:
+        mapping, unused_photos, unmatched_products = auto_match_photos(products, photo_dir)
+        log("")
+        log("按文件名自动匹配的结果（照片文件名 -> 商品）：")
+        for product_id in sorted(mapping):
+            photo, score = mapping[product_id]
+            log("  {0:>2} | {1:<26} <- {2}   相似度 {3:.2f}".format(
+                product_id, by_id[product_id]["title"][:24], photo, score))
+        if unused_photos:
+            log("  未匹配到商品的照片：" + "、".join(unused_photos))
+        if unmatched_products:
+            log("  没有找到照片的商品：" + "、".join(f"{p['id']} {p['title']}" for p in unmatched_products))
+        mapping_path = write_filled_mapping(photo_dir, products, mapping)
+        log(f"  匹配结果已写入：{mapping_path}")
+        filled = len(mapping)
+        for product_id, (photo, _score) in mapping.items():
+            items.append({"productId": product_id,
+                          "source": os.path.join(photo_dir, photo),
+                          "output": f"product-{product_id:02d}.jpg"})
+    else:
+        mapping_path = find_mapping_file(photo_dir, args.map)
+        if not mapping_path:
+            raise SystemExit(f"在 {photo_dir} 里没有找到对照表（文件名需包含「对照表」，支持 xlsx/csv/txt）")
+        log(f"使用对照表：{mapping_path}")
+        rows = parse_mapping(mapping_path)
+        for product_id, raw_name in rows:
+            if product_id is None:
+                skipped.append((None, "商品ID 无法识别（必须是数字）"))
+                continue
+            if product_id not in by_id:
+                skipped.append((product_id, "商品 ID 不在 1-20 范围内"))
+                continue
+            if not raw_name:
+                continue
+            filled += 1
+            photo, error = resolve_photo(photo_dir, raw_name)
+            if not photo:
+                skipped.append((product_id, f"「{raw_name}」{error}"))
+                continue
+            items.append({"productId": product_id, "source": photo, "output": f"product-{product_id:02d}.jpg"})
+        if filled == 0:
+            log("  （对照表里还没有填照片文件名；如果照片文件名能说明商品，可以改用 --auto-match 自动匹配）")
+
+    log("")
+    log(f"共匹配到 {filled} 件商品的照片，可处理 {len(items)} 张")
     if not items:
         log("没有可处理的照片。请检查对照表里是否填了「照片文件名」，以及文件是否真的在目录中。")
         for product_id, reason in skipped:

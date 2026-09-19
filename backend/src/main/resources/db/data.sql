@@ -45,26 +45,26 @@ INSERT IGNORE INTO `product`
 
 -- 商品配图：使用 resources/seed-images 下的示例图（由 scripts/generate_placeholder_images.py 生成，通过 /seed/** 访问）
 INSERT IGNORE INTO `product_image` (`id`, `product_id`, `url`, `sort`) VALUES
-  (1,  1,  '/seed/p01.png', 0),
-  (2,  2,  '/seed/p02.png', 0),
-  (3,  3,  '/seed/p03.png', 0),
-  (4,  4,  '/seed/p04.png', 0),
-  (5,  5,  '/seed/p05.png', 0),
-  (6,  6,  '/seed/p06.png', 0),
-  (7,  7,  '/seed/p07.png', 0),
-  (8,  8,  '/seed/p08.png', 0),
-  (9,  9,  '/seed/p01.png', 0),
-  (10, 10, '/seed/p02.png', 0),
-  (11, 11, '/seed/p03.png', 0),
-  (12, 12, '/seed/p04.png', 0),
-  (13, 13, '/seed/p05.png', 0),
-  (14, 14, '/seed/p06.png', 0),
-  (15, 15, '/seed/p07.png', 0),
-  (16, 16, '/seed/p08.png', 0),
-  (17, 17, '/seed/p02.png', 0),
-  (18, 18, '/seed/p03.png', 0),
-  (19, 19, '/seed/p01.png', 0),
-  (20, 20, '/seed/p06.png', 0);
+  (1,  1,  '/seed/product-01.jpg', 0),
+  (2,  2,  '/seed/product-02.jpg', 0),
+  (3,  3,  '/seed/product-03.jpg', 0),
+  (4,  4,  '/seed/product-04.jpg', 0),
+  (5,  5,  '/seed/product-05.jpg', 0),
+  (6,  6,  '/seed/product-06.jpg', 0),
+  (7,  7,  '/seed/product-07.jpg', 0),
+  (8,  8,  '/seed/product-08.jpg', 0),
+  (9,  9,  '/seed/product-09.jpg', 0),
+  (10, 10, '/seed/product-10.jpg', 0),
+  (11, 11, '/seed/product-11.jpg', 0),
+  (12, 12, '/seed/product-12.jpg', 0),
+  (13, 13, '/seed/product-13.jpg', 0),
+  (14, 14, '/seed/product-14.jpg', 0),
+  (15, 15, '/seed/product-15.jpg', 0),
+  (16, 16, '/seed/product-16.jpg', 0),
+  (17, 17, '/seed/product-17.jpg', 0),
+  (18, 18, '/seed/product-18.jpg', 0),
+  (19, 19, '/seed/product-19.jpg', 0),
+  (20, 20, '/seed/product-20.jpg', 0);
 
 -- 收藏数据：buyer01 收藏了 3 件商品
 INSERT IGNORE INTO `favorite` (`id`, `user_id`, `product_id`) VALUES

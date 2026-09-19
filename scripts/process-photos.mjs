@@ -21,6 +21,7 @@ const sharp = requireFromProject(SHARP_PATH)
 const WIDTH = 800
 const HEIGHT = 600
 const QUALITY = 85
+const TARGET_ASPECT = WIDTH / HEIGHT // 4:3
 
 function readArg(name, fallback = null) {
   const index = process.argv.indexOf(name)
@@ -45,9 +46,27 @@ for (const item of jobs.items) {
     }
     fs.mkdirSync(path.dirname(target), { recursive: true })
     const beforeMeta = await sharp(item.source).metadata()
+    // 带 EXIF 方向标记的照片（手机竖拍）要先交换宽高，再计算裁剪区域
+    const swapped = [5, 6, 7, 8].includes(beforeMeta.orientation)
+    const srcWidth = swapped ? beforeMeta.height : beforeMeta.width
+    const srcHeight = swapped ? beforeMeta.width : beforeMeta.height
+
+    // 第一步：只裁剪不缩放，裁出居中的 4:3 区域（保证每张图都是 4:3）
+    let cropWidth = srcWidth
+    let cropHeight = srcHeight
+    if (srcWidth / srcHeight > TARGET_ASPECT) {
+      cropWidth = Math.round(srcHeight * TARGET_ASPECT)
+    } else {
+      cropHeight = Math.round(srcWidth / TARGET_ASPECT)
+    }
+    const left = Math.max(0, Math.round((srcWidth - cropWidth) / 2))
+    const top = Math.max(0, Math.round((srcHeight - cropHeight) / 2))
+
+    // 第二步：等比缩放到不超过 800x600（小图不放大，避免糊）
     await sharp(item.source)
-      .rotate() // 按 EXIF 自动纠正手机拍摄方向
-      .resize({ width: WIDTH, height: HEIGHT, fit: 'cover', position: 'centre', withoutEnlargement: true })
+      .rotate()
+      .extract({ left, top, width: cropWidth, height: cropHeight })
+      .resize({ width: WIDTH, height: HEIGHT, fit: 'inside', withoutEnlargement: true })
       .jpeg({ quality: QUALITY, mozjpeg: true })
       .toFile(target)
     const afterMeta = await sharp(target).metadata()
