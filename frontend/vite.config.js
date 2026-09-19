@@ -15,6 +15,11 @@ export default defineConfig({
       '/uploads': {
         target: 'http://localhost:8080',
         changeOrigin: true
+      },
+      // 初始数据里的示例商品图（由后端 Spring 静态资源提供）
+      '/seed': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
       }
     }
   },
