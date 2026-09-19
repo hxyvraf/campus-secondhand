@@ -1,0 +1,72 @@
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+spring:
+  application:
+    name: campus-trade
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # createDatabaseIfNotExist=true：首次启动自动建库，不需要手工执行 CREATE DATABASE
+    url: jdbc:mysql://localhost:3306/campus_trade?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: "123456"
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+      schema-locations: classpath:db/schema.sql
+      data-locations: classpath:db/data.sql
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 20MB
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+logging:
+  level:
+    root: info
+    com.campus.trade: info
+    com.campus.trade.mapper: debug
+
+# ------------------------- 业务自定义配置 -------------------------
+app:
+  jwt:
+    # HS256 密钥，长度需 >= 256 bit；正式环境请替换为随机值
+    secret: campus-trade-demo-secret-key-2026-change-me-in-production-env
+    expire-minutes: 120
+  order:
+    # 买家下单后多少分钟未确认自动关闭（练习超时场景时可改成 1~2）
+    timeout-minutes: 30
+    # 超时扫描定时任务执行频率（默认每分钟）
+    scan-cron: "0 * * * * ?"
+  upload:
+    # 图片保存目录（相对后端运行目录）
+    dir: uploads
+    max-size-mb: 5
+    allowed-ext: jpg,jpeg,png
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs

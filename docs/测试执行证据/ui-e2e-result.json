@@ -1,0 +1,122 @@
+{
+  "base": "http://localhost:5173",
+  "pass": 23,
+  "fail": 0,
+  "results": [
+    {
+      "name": "01 首页-未登录浏览商品列表",
+      "ok": true,
+      "detail": "商品卡片 12 个"
+    },
+    {
+      "name": "02 首页-关键词搜索",
+      "ok": true,
+      "detail": "命中 1 个商品"
+    },
+    {
+      "name": "03 首页-分类筛选与排序",
+      "ok": true,
+      "detail": "数码电子 · 共 4 件 价格序列=¥22.00,¥35.00,¥55.00,¥120.00"
+    },
+    {
+      "name": "04 商品详情-查看商品信息",
+      "ok": true,
+      "detail": "九成新《软件测试技术》教材"
+    },
+    {
+      "name": "05 未登录点击立即购买跳转登录页",
+      "ok": true,
+      "detail": "http://localhost:5173/login?redirect=/products/1"
+    },
+    {
+      "name": "06 登录 buyer01",
+      "ok": true,
+      "detail": "苏晴 ▾"
+    },
+    {
+      "name": "07 商品详情-收藏商品",
+      "ok": true,
+      "detail": "收藏成功"
+    },
+    {
+      "name": "08 下单-立即购买并填写留言",
+      "ok": true,
+      "detail": "http://localhost:5173/orders?orderId=3"
+    },
+    {
+      "name": "10 我的收藏列表",
+      "ok": true,
+      "detail": "4 条收藏"
+    },
+    {
+      "name": "11 发布闲置-表单校验提示",
+      "ok": true,
+      "detail": "3 条校验提示"
+    },
+    {
+      "name": "12 发布闲置-填写表单并上传图片",
+      "ok": true,
+      "detail": "前端联调测试商品-509151"
+    },
+    {
+      "name": "13 发布闲置-提交并跳转详情",
+      "ok": true,
+      "detail": "http://localhost:5173/products/21"
+    },
+    {
+      "name": "14 我发布的商品列表",
+      "ok": true,
+      "detail": "前端联调测试商品-509151"
+    },
+    {
+      "name": "15 商品下架与重新上架",
+      "ok": true,
+      "detail": "状态=已下架"
+    },
+    {
+      "name": "16 消息中心-未读与标记已读",
+      "ok": true,
+      "detail": "未读消息 1 条"
+    },
+    {
+      "name": "17 个人中心-资料与改密码表单",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "18 卖家登录并确认订单",
+      "ok": true,
+      "detail": "卖家确认成功"
+    },
+    {
+      "name": "20 买家登录并确认完成",
+      "ok": true,
+      "detail": "\t | 确认完成 | 取消订单"
+    },
+    {
+      "name": "21 管理员-商品管理页",
+      "ok": true,
+      "detail": "10 行数据"
+    },
+    {
+      "name": "22 管理员-强制下架商品",
+      "ok": true,
+      "detail": "商品已是下架状态，跳过强制下架"
+    },
+    {
+      "name": "23 管理员-用户管理页",
+      "ok": true,
+      "detail": "4 个用户"
+    },
+    {
+      "name": "24 管理员-分类管理页",
+      "ok": true,
+      "detail": "6 个分类"
+    },
+    {
+      "name": "25 窄屏适配（900px）",
+      "ok": true,
+      "detail": "900x900"
+    }
+  ]
+}
