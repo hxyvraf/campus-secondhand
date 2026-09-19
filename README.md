@@ -118,6 +118,8 @@ campus-secondhand/
 | `scripts/generate_postman_collection.py` | 重新生成 Postman 集合与环境文件 |
 | `scripts/generate_api_doc.py` | 依据 openapi.json + 真实执行报告重新生成接口文档 |
 | `scripts/generate_test_docs.py` | 依据真实执行报告重新生成测试用例.xlsx / 缺陷记录表.xlsx / 测试报告.md |
+| `scripts/import-product-photos.py` | 用真实照片替换商品占位图：`--init` 生成桌面「商品照片」文件夹与对照表模板，`--dry-run` 预演，`--apply` 正式替换 |
+| `scripts/process-photos.mjs` | 图片处理（sharp）：EXIF 方向纠正 → 4:3 居中裁剪 → 800×600 → JPEG q85 |
 
 ## 八、关键业务规则（面试可讲）
 
@@ -138,3 +140,13 @@ campus-secondhand/
 | 想恢复到刚初始化时的数据 | 双击「重置数据.bat」，输入 Y 确认 |
 | 重新打包后端失败，提示 jar 被占用 | 先关闭运行后端的窗口（或运行「重新打包后端.bat」，脚本会先停服务） |
 | 上传图片失败 | 只支持 jpg/jpeg/png，单张不超过 5MB；上传目录为 `backend/uploads` |
+
+## 十、关于商品图片
+
+- 初始数据里的商品图片是脚本生成的**占位图**（`backend/src/main/resources/seed-images/p01.png` ~ `p08.png`，8 张循环使用），由 `scripts/generate_placeholder_images.py` 生成，可随时重新生成。
+- **替换成你自己的真实照片**：把照片和填好的「对照表模板.xlsx」放到桌面 `商品照片` 文件夹（执行 `python scripts/import-product-photos.py --init` 会自动创建该文件夹与模板），然后运行：
+  - `python scripts/import-product-photos.py --dry-run`：预演，只处理图片到临时目录并打印替换清单，不改动任何项目文件；
+  - `python scripts/import-product-photos.py --apply`：正式替换，把处理后的 `product-01.jpg` ~ `product-20.jpg` 写入 `seed-images`、改写 `data.sql` 并更新数据库（不会清空已有测试数据）；
+  - 之后双击「重新打包后端.bat」再「启动后端.bat」，刷新页面即可看到新照片；未提供照片的商品继续使用占位图。
+- 照片会被统一处理成 4:3、800×600、JPEG 质量 85（小于该尺寸不放大），单张约 50–150KB。
+- 商品图片为个人练习与简历演示用的素材，请使用可自由使用的图片，不要用于商业用途。

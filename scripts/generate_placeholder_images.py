@@ -1,5 +1,9 @@
 """生成商品占位图（纯标准库手写 PNG，不依赖任何第三方库）。
 
+注意：占位图只用于「还没有提供真实照片」的商品。提供真实照片请用
+scripts/import-product-photos.py（配合 scripts/process-photos.mjs），
+处理后的照片会以 product-NN.jpg 命名放在同一目录下，不会覆盖这里的占位图。
+
 用在两处：
 1) 初始数据里的商品配图（backend/uploads/seed/*.png）；
 2) 接口测试上传图片用例的测试素材（docs/测试素材/test-upload.png）。
