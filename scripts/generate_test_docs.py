@@ -610,7 +610,7 @@ def write_test_report(cases, modules):
     lines.append("| Postman 上传测试素材 | `docs/postman/testdata/` |")
     lines.append("| newman HTML 报告 | `docs/测试执行证据/newman-report.html` |")
     lines.append("| newman JSON 原始结果 | `docs/测试执行证据/newman-report.json` |")
-    lines.append("| 前端真实点击截图（25 张） | `docs/测试执行证据/截图/` |")
+    lines.append("| 前端真实点击截图（24 张） | `docs/测试执行证据/截图/` |")
     lines.append("| 测试用例表 | `docs/测试用例.xlsx` |")
     lines.append("| 缺陷记录表 | `docs/缺陷记录表.xlsx` |")
     lines.append("| 测试点梳理 | `docs/测试点梳理.md` |")
