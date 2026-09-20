@@ -11,22 +11,41 @@
 | 层次 | 技术 |
 | --- | --- |
 | 前端 | Vue 3.5 + Vite + Element Plus + Pinia + Vue Router + Axios |
-| 后端 | Spring Boot 3.3.5 + Java 21 + MyBatis-Plus 3.5.7 + springdoc-openapi（Swagger） + JWT（jjwt） + BCrypt |
+| 后端 | Spring Boot 3.3.5 + Java 17+（字节码 17，JDK 17/21 均可运行） + MyBatis-Plus 3.5.7 + springdoc-openapi（Swagger） + JWT（jjwt） + BCrypt |
 | 数据库 | MySQL 8（`campus_trade`，7 张表，首次启动自动建库建表 + 写入初始数据） |
 | 测试 | Postman 集合 + newman 批量执行、Playwright 浏览器真实点击、MySQL 数据校验 |
 
 ## 二、快速开始（Windows）
 
-> 前置条件：已安装 JDK 21、Maven 3.9+、Node.js 20+、MySQL 8（本地 3306，账号 `root` / `123456`）。
+### 方式 A：解压即用（免构建，推荐给只想跑起来的人）
+
+> 前置条件：**JDK 17 或更高版本**（命令行 `java -version` 能看到 17+）+ **MySQL 8**（已启动）。
+> 不需要 Maven、Node.js，也不需要联网：前端页面已经打包进后端 jar。
+
+1. 到本仓库的 **Releases** 页面下载发行包 `campus-secondhand-v1.0.0-java17.zip`（约 40MB，附件不受 25MB 上传限制）并解压；
+2. 双击 **`启动系统.bat`**：首次会依次询问 MySQL 地址 / 端口 / 账号 / 密码 / 库名 / 服务端口
+   （直接回车使用括号里的默认值），随后自动校验连接、创建数据库、建表、写入初始数据，并打开浏览器；
+3. 以后每次只需双击 `启动系统.bat`；要换数据库账号或端口，双击 `配置数据库.bat`。
+
+更完整的说明（安装 JDK/MySQL、常见问题、目录含义）见包内 **`使用说明.txt`**。
+
+### 方式 B：源码开发（需要改代码时）
+
+> 前置条件：已安装 JDK 17+、Maven 3.9+、Node.js 20+、MySQL 8（本地 3306，默认账号 `root` / `123456`）。
 
 1. 双击 **`一键启动.bat`**：会同时启动后端（8080）与前端（5173），并自动打开浏览器；
    也可以分开双击 **`启动后端.bat`** 和 **`启动前端.bat`**。
 2. 首次启动后端会自动打包（联网下载 Maven 依赖），并自动创建数据库 `campus_trade`、建表、写入初始数据。
 3. 首次启动前端会自动执行 `npm install`。
 
+> 源码方式用的是 jar 内置的默认数据库配置（`root` / `123456`）；如果你本机 MySQL 密码不是这个，
+> 可以先用 `配置数据库.bat` 生成 `backend\config\application.yml`，然后改用 `启动系统.bat` 启动单端口模式（8080）。
+> 也可以直接修改 `backend/src/main/resources/application.yml` 后双击 `重新打包后端.bat`。
+
 | 用途 | 地址 |
 | --- | --- |
-| 前端页面 | http://localhost:5173 |
+| 前端页面（方式 A 单端口） | http://localhost:8080 |
+| 前端页面（方式 B 开发态） | http://localhost:5173 |
 | 后端接口根地址 | http://localhost:8080 |
 | 在线接口文档（Swagger UI） | http://localhost:8080/swagger-ui.html |
 | OpenAPI 原始定义 | http://localhost:8080/v3/api-docs |
@@ -71,11 +90,17 @@ campus-secondhand/
 │  │  ├─ db/schema.sql         建表脚本
 │  │  ├─ db/data.sql           初始数据（可重复执行）
 │  │  └─ seed-images/          初始数据用的示例商品图
+│  ├─ target/campus-trade.jar  预构建的可执行 jar（前端已内嵌，免构建启动用）
+│  ├─ config/application.yml   本机配置（首次运行由「配置数据库.bat」生成，不入库、不入发行包）
 │  └─ uploads/                 用户上传的图片（运行时生成）
 ├─ frontend/                   Vue 3 前端（页面、路由、Pinia、Axios 封装）
 ├─ docs/                       接口文档与测试文档（见下）
 ├─ scripts/                    启动/重置/打包/测试脚本与文档生成脚本
-├─ 一键启动.bat 等             双击即用的入口脚本
+├─ _release/                   发行包输出目录（打包脚本生成，不入库）
+├─ 启动系统.bat                解压即用：免构建启动（单端口 8080）
+├─ 配置数据库.bat              重新填写数据库连接与端口
+├─ 使用说明.txt                发行包随包说明
+└─ 一键启动.bat 等             源码开发用的入口脚本
 ```
 
 ## 五、接口文档与测试文档
@@ -93,6 +118,7 @@ campus-secondhand/
 | [docs/测试报告.md](docs/测试报告.md) | 执行统计、缺陷分布、关键场景结论、遗留问题与证据清单 |
 | [docs/测试执行证据/](docs/测试执行证据/) | newman HTML/JSON 报告、24 张真实操作截图、冒烟结果 |
 | [docs/数据库设计.md](docs/数据库设计.md) | 7 张表结构、索引、ER 关系、初始数据与校验 SQL |
+| [docs/校园二手交易平台测试/](docs/校园二手交易平台测试/) | 按模块整理的测试资料：11 个模块 + 7 条业务流程的 XMind 测试点梳理（18 份脑图）、21 份配套用例与缺陷记录表、7 张业务流程图与流程测试说明 |
 
 ## 六、接口测试怎么练
 
@@ -106,6 +132,8 @@ campus-secondhand/
 
 | 脚本 | 作用 |
 | --- | --- |
+| `启动系统.bat` | **解压即用**：免构建启动已打包好的 jar（单端口 8080，无 Maven / Node / 联网要求），首次自动进入数据库配置问答 |
+| `配置数据库.bat` | 重新填写 MySQL 地址 / 端口 / 账号 / 密码 / 库名 / 服务端口，写入 `backend\config\application.yml` |
 | `一键启动.bat` | 分别启动后端与前端，并打开浏览器 |
 | `启动后端.bat` / `启动前端.bat` | 单独启动某一端（首次会自动安装依赖/打包） |
 | `重新打包后端.bat` | 停掉运行中的后端 → `mvn clean package` |
@@ -113,6 +141,9 @@ campus-secondhand/
 | `重置数据.bat` | 删除 `campus_trade` 数据库 → 重启后端 → 恢复到初始数据 |
 | `初始化数据库.bat` | 不启动后端，直接用 mysql 客户端执行 schema.sql 与 data.sql 并校验条数 |
 | `跑接口测试-newman.bat` | newman 执行 Postman 集合并生成 HTML 报告 |
+| `scripts/start-standalone.ps1` | `启动系统.bat` 调用的脚本：环境自检（jar / Java 版本 / 配置 / 端口）→ 启动 → 打开浏览器 |
+| `scripts/configure-database.ps1` | `配置数据库.bat` 调用的脚本，也支持非交互调用：`-DbHost -DbPort -DbUser -DbPassword -DbName -ServerPort` |
+| `scripts/package-release.ps1` | 生成「解压即用」发行 zip：干净拷贝 + 内容审计 + SHA256 + 文件清单，输出到 `_release\` |
 | `scripts/smoke-test.ps1` | 接口冒烟脚本（111 条断言，覆盖正常/异常/边界，结果写入 docs/测试执行证据/smoke-result.txt） |
 | `scripts/ui-e2e.mjs` | Playwright 驱动浏览器真实点击 23 个前端场景并截图（需先启动前后端） |
 | `scripts/generate_postman_collection.py` | 重新生成 Postman 集合与环境文件 |

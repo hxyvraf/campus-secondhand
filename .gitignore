@@ -2,6 +2,9 @@ target/
 node_modules/
 dist/
 uploads/
+backend/config/
+_release/
+/*.zip
 .idea/
 *.log
 _agent_scratch/
